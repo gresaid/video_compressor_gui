@@ -1,5 +1,14 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+View module for Video Compressor application.
+Responsible for user interface and user interaction.
+"""
+
 import dearpygui.dearpygui as dpg
 from tkinter import filedialog, Tk
+import os
+from typing import Dict, List, Any, Callable
 
 
 class CompressionView:
@@ -11,10 +20,6 @@ class CompressionView:
         """Настраивает пользовательский интерфейс"""
         dpg.create_context()
 
-        # Стили и шрифты
-        with dpg.font_registry():
-            # Здесь можно добавить пользовательские шрифты
-            pass
 
         with dpg.theme() as global_theme:
             with dpg.theme_component(dpg.mvAll):
@@ -24,26 +29,26 @@ class CompressionView:
 
         dpg.bind_theme(global_theme)
 
-        # Основное окно
-        with dpg.window(label="Видео Компрессор", width=650, height=650, tag="main_window", no_resize=True):
-            # Выбор папок
-            with dpg.collapsing_header(label="Папки", default_open=True):
+        # Main window
+        with dpg.window(label="Video Compressor", width=650, height=650, tag="main_window", no_resize=True):
+            # Folder selection
+            with dpg.collapsing_header(label="Folders", default_open=True):
                 with dpg.group():
                     with dpg.group(horizontal=True):
-                        dpg.add_button(label="Выберите входную папку", callback=self.on_select_input_folder)
-                        dpg.add_text("Папка: не выбрана", tag="selected_folder")
+                        dpg.add_button(label="Select input folder", callback=self.on_select_input_folder)
+                        dpg.add_text("Folder: not selected", tag="selected_folder")
 
                     with dpg.group(horizontal=True):
-                        dpg.add_button(label="Выберите выходную папку", callback=self.on_select_output_folder)
-                        dpg.add_text("Папка: не выбрана", tag="selected_output_folder")
-                        dpg.add_checkbox(label="Та же, что и входная", default_value=True,
-                                         callback=self.on_same_folder_toggle, tag="same_folder_checkbox")
+                        dpg.add_button(label="Select output folder", callback=self.on_select_output_folder)
+                        dpg.add_text("Folder: not selected", tag="selected_output_folder")
+                        dpg.add_checkbox(label="Same as input", default_value=True, callback=self.on_same_folder_toggle,
+                                         tag="same_folder_checkbox")
 
-            # Настройки файлов
-            with dpg.collapsing_header(label="Настройки файлов", default_open=True):
+            # File settings
+            with dpg.collapsing_header(label="File Settings", default_open=True):
                 with dpg.group():
                     dpg.add_combo(
-                        label="Формат входных файлов",
+                        label="Input file format",
                         items=["mp4", "mkv", "avi", "mov", "webm"],
                         default_value="mp4",
                         callback=self.on_input_extension_changed,
@@ -51,18 +56,18 @@ class CompressionView:
                     )
 
                     dpg.add_combo(
-                        label="Формат выходных файлов",
+                        label="Output file format",
                         items=["mp4", "mkv", "avi", "mov", "webm"],
                         default_value="mp4",
                         callback=self.on_output_extension_changed,
                         width=200
                     )
 
-            # Настройки кодирования
-            with dpg.collapsing_header(label="Настройки кодирования", default_open=True):
+            # Encoding settings
+            with dpg.collapsing_header(label="Encoding Settings", default_open=True):
                 with dpg.group():
                     dpg.add_slider_int(
-                        label="Количество потоков",
+                        label="Number of threads",
                         default_value=1,
                         min_value=1,
                         max_value=8,
@@ -71,47 +76,47 @@ class CompressionView:
                     )
 
                     dpg.add_combo(
-                        label="Предустановка кодирования",
+                        label="Encoding preset",
                         items=[
-                            "Оригинальный (AV1 NVENC)",
-                            "Высокое качество (H265)",
-                            "Быстрое сжатие (H264)",
-                            "Максимальное сжатие (AV1)",
-                            "Стандартный (H264)"
+                            "Original (AV1 NVENC)",
+                            "High Quality (H265)",
+                            "Fast Compression (H264)",
+                            "Maximum Compression (AV1)",
+                            "Standard (H264)"
                         ],
-                        default_value="Оригинальный (AV1 NVENC)",
+                        default_value="Original (AV1 NVENC)",
                         callback=self.on_preset_selected,
                         width=350
                     )
 
                     with dpg.group(horizontal=True):
-                        dpg.add_text("Описание:")
-                        dpg.add_text("Оригинальные настройки из исходного проекта", tag="preset_description")
+                        dpg.add_text("Description:")
+                        dpg.add_text("Original settings from the initial project", tag="preset_description")
 
-            # Кнопки управления
+            # Control buttons
             with dpg.group(horizontal=True):
-                dpg.add_button(label="Начать сжатие", callback=self.on_start, width=150, height=40)
-                dpg.add_button(label="Остановить", callback=self.on_stop, width=150, height=40)
+                dpg.add_button(label="Start Compression", callback=self.on_start, width=150, height=40)
+                dpg.add_button(label="Stop", callback=self.on_stop, width=150, height=40)
 
-            # Прогресс
-            dpg.add_text("Общий прогресс:")
+            # Progress
+            dpg.add_text("Overall progress:")
             dpg.add_progress_bar(tag="main_progress_bar", width=-1, height=20)
 
-            # Информация о текущем процессе
+            # Current process info
             with dpg.group(horizontal=True):
-                dpg.add_text("Время: 00:00:00.00", tag="current_time")
+                dpg.add_text("Time: 00:00:00.00", tag="current_time")
                 dpg.add_spacer(width=20)
-                dpg.add_text("Скорость: 0.0x", tag="current_speed")
+                dpg.add_text("Speed: 0.0x", tag="current_speed")
 
-            # Список файлов
-            dpg.add_text("Файлы:")
+            # File list
+            dpg.add_text("Files:")
             with dpg.child_window(tag="file_list", width=-1, height=150):
-                pass  # Контент будет добавлен динамически
+                pass  # Content will be added dynamically
 
-            # Журнал
-            dpg.add_text("Журнал:")
+            # Log
+            dpg.add_text("Log:")
             with dpg.child_window(tag="log_window", width=-1, height=100):
-                dpg.add_text("Готов к работе", tag="log")
+                dpg.add_text("Ready to work", tag="log")
 
         # Создание окна
         dpg.create_viewport(title="Видео Компрессор", width=670, height=700)
@@ -131,24 +136,24 @@ class CompressionView:
         self.destroy()
 
     def update_file_list(self, files, statuses, file_info=None):
-        """Обновляет список файлов в UI"""
+        """Updates the file list in the UI"""
         dpg.delete_item("file_list", children_only=True)
 
         for file in files:
             status = statuses[file]
 
             if status.value == "pending":
-                color = (255, 255, 0)  # Желтый
-                status_text = "(В ожидании)"
+                color = (255, 255, 0)  # Yellow
+                status_text = "(Pending)"
             elif status.value == "processing":
-                color = (255, 165, 0)  # Оранжевый
-                status_text = "(В процессе)"
+                color = (255, 165, 0)  # Orange
+                status_text = "(Processing)"
             elif status.value == "done":
-                color = (0, 255, 0)  # Зеленый
-                status_text = "(Готово)"
+                color = (0, 255, 0)  # Green
+                status_text = "(Done)"
             else:  # error
-                color = (255, 0, 0)  # Красный
-                status_text = "(Ошибка)"
+                color = (255, 0, 0)  # Red
+                status_text = "(Error)"
 
             with dpg.group(parent="file_list"):
                 info_text = ""
@@ -164,35 +169,35 @@ class CompressionView:
                 dpg.add_text(f"{file} {status_text}{info_text}", color=color)
 
     def update_progress_bar(self, progress):
-        """Обновляет индикатор прогресса"""
+        """Updates the progress bar"""
         dpg.set_value("main_progress_bar", progress)
 
     def update_time(self, time):
-        """Обновляет отображение текущего времени"""
-        dpg.set_value("current_time", f"Время: {time}")
+        """Updates the current time display"""
+        dpg.set_value("current_time", f"Time: {time}")
 
     def update_speed(self, speed):
-        """Обновляет отображение текущей скорости"""
-        dpg.set_value("current_speed", f"Скорость: {speed}")
+        """Updates the current speed display"""
+        dpg.set_value("current_speed", f"Speed: {speed}")
 
     def update_input_folder_label(self, folder):
-        """Обновляет отображение входной папки"""
+        """Updates the input folder display"""
         display_folder = folder
         if len(folder) > 40:
             display_folder = "..." + folder[-40:]
-        dpg.set_value("selected_folder", f"Папка: {display_folder}")
+        dpg.set_value("selected_folder", f"Folder: {display_folder}")
 
     def update_output_folder_label(self, folder):
-        """Обновляет отображение выходной папки"""
+        """Updates the output folder display"""
         display_folder = folder
         if len(folder) > 40:
             display_folder = "..." + folder[-40:]
-        dpg.set_value("selected_output_folder", f"Папка: {display_folder}")
+        dpg.set_value("selected_output_folder", f"Folder: {display_folder}")
 
     def update_log(self, message):
-        """Добавляет сообщение в журнал"""
+        """Adds a message to the log"""
         current_log = dpg.get_value("log")
-        # Ограничиваем журнал последними 10 строками
+        # Limit log to the last 10 lines
         log_lines = current_log.split("\n")
         if len(log_lines) > 10:
             log_lines = log_lines[-9:]
@@ -200,8 +205,8 @@ class CompressionView:
         dpg.set_value("log", "\n".join(log_lines))
 
     def show_error(self, message):
-        """Показывает окно с ошибкой"""
-        with dpg.window(label="Ошибка", modal=True, width=400, height=150, pos=[100, 200]):
+        """Shows an error window"""
+        with dpg.window(label="Error", modal=True, width=400, height=150, pos=[100, 200]):
             dpg.add_text(message, wrap=380)
             dpg.add_button(label="OK", width=100, callback=lambda: dpg.delete_item(dpg.last_container()))
 
@@ -252,21 +257,21 @@ class CompressionView:
         self.controller.on_threads_changed(int(app_data))
 
     def on_preset_selected(self, sender, app_data):
-        """Обработчик выбора пресета кодирования"""
+        """Preset selection handler"""
         self.controller.on_preset_changed(app_data)
 
-        # Обновляем описание пресета
+        # Update preset description
         description = ""
-        if app_data == "Оригинальный (AV1 NVENC)":
-            description = "Оригинальные настройки из исходного проекта"
-        elif app_data == "Высокое качество (H265)":
-            description = "Высокое качество при умеренном размере файла (HEVC)"
-        elif app_data == "Быстрое сжатие (H264)":
-            description = "Быстрое сжатие с приоритетом скорости над качеством"
-        elif app_data == "Максимальное сжатие (AV1)":
-            description = "Максимальное сокращение размера файла"
-        elif app_data == "Стандартный (H264)":
-            description = "Стандартные настройки H264 для совместимости"
+        if app_data == "Original (AV1 NVENC)":
+            description = "Original settings from the initial project"
+        elif app_data == "High Quality (H265)":
+            description = "High quality with moderate file size (HEVC)"
+        elif app_data == "Fast Compression (H264)":
+            description = "Fast compression prioritizing speed over quality"
+        elif app_data == "Maximum Compression (AV1)":
+            description = "Maximum file size reduction"
+        elif app_data == "Standard (H264)":
+            description = "Standard H264 settings for compatibility"
 
         dpg.set_value("preset_description", description)
 

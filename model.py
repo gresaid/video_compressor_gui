@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Model module for Video Compressor application.
+Contains business logic and application data.
+"""
+
 import os
 import re
 import queue
@@ -125,12 +132,12 @@ class CompressionModel:
             self.notify_observers("error", f"Ошибка при обработке файлов: {str(e)}")
 
     def _format_size(self, size_bytes):
-        """Форматирует размер в байтах в читаемый формат"""
-        for unit in ['Б', 'КБ', 'МБ', 'ГБ', 'ТБ']:
+        """Formats byte size to readable format"""
+        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
-        return f"{size_bytes:.2f} ПБ"
+        return f"{size_bytes:.2f} PB"
 
     def set_threads(self, threads):
         """Устанавливает количество потоков"""
@@ -270,7 +277,7 @@ class CompressionModel:
 
         return command
 
-    def _run_ffmpeg_process(self, command):
+    def _run_ffmpeg_process(self, command, file):
         """Запускает процесс ffmpeg и обрабатывает его вывод"""
         try:
             process = subprocess.Popen(

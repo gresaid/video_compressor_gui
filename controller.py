@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Controller module for Video Compressor application.
+Coordinates interaction between model and view.
+"""
+
 from datetime import datetime
 from typing import Optional
 
@@ -95,9 +102,9 @@ class CompressionController:
         self.model.set_threads(threads)
 
     def on_preset_changed(self, preset_name):
-        """Обработчик изменения пресета кодирования"""
+        """Preset change handler"""
         self.model.set_preset(preset_name)
-        self._log(f"Выбран пресет кодирования: {preset_name}")
+        self._log(f"Selected encoding preset: {preset_name}")
 
     def on_start_compression(self):
         """Обработчик запуска сжатия"""
