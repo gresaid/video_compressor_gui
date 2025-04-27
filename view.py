@@ -20,7 +20,6 @@ class CompressionView:
         """Настраивает пользовательский интерфейс"""
         dpg.create_context()
 
-
         with dpg.theme() as global_theme:
             with dpg.theme_component(dpg.mvAll):
                 dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5, category=dpg.mvThemeCat_Core)
@@ -79,10 +78,8 @@ class CompressionView:
                         label="Encoding preset",
                         items=[
                             "Original (AV1 NVENC)",
-                            "High Quality (H265)",
-                            "Fast Compression (H264)",
-                            "Maximum Compression (AV1)",
-                            "Standard (H264)"
+                            "GPU (H265)",
+                            "GPU (H264)",
                         ],
                         default_value="Original (AV1 NVENC)",
                         callback=self.on_preset_selected,
@@ -264,14 +261,10 @@ class CompressionView:
         description = ""
         if app_data == "Original (AV1 NVENC)":
             description = "Original settings from the initial project"
-        elif app_data == "High Quality (H265)":
+        elif app_data == "GPU (H265)":
             description = "High quality with moderate file size (HEVC)"
-        elif app_data == "Fast Compression (H264)":
+        elif app_data == "GPU (H264)":
             description = "Fast compression prioritizing speed over quality"
-        elif app_data == "Maximum Compression (AV1)":
-            description = "Maximum file size reduction"
-        elif app_data == "Standard (H264)":
-            description = "Standard H264 settings for compatibility"
 
         dpg.set_value("preset_description", description)
 

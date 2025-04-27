@@ -45,34 +45,21 @@ class CompressionModel:
                 "rc": "vbr",
                 "cq": "35"
             },
-            "Высокое качество (H265)": {
+            "GPU (H265)": {
                 "codec": "hevc_nvenc",
-                "preset": "p2",
+                "preset": "p5",
                 "b_ref_mode": "middle",
                 "rc": "vbr",
-                "cq": "23"
+                "cq": "35"
             },
-            "Быстрое сжатие (H264)": {
+            "GPU (H264)": {
                 "codec": "h264_nvenc",
-                "preset": "p7",
-                "b_ref_mode": "disabled",
-                "rc": "vbr",
-                "cq": "30"
-            },
-            "Максимальное сжатие (AV1)": {
-                "codec": "av1_nvenc",
-                "preset": "p4",
+                "preset": "p5",
                 "b_ref_mode": "middle",
                 "rc": "vbr",
-                "cq": "45"
-            },
-            "Стандартный (H264)": {
-                "codec": "h264_nvenc",
-                "preset": "p4",
-                "b_ref_mode": "middle",
-                "rc": "vbr",
-                "cq": "28"
+                "cq": "35"
             }
+
         }
 
         # Текущий выбранный пресет
